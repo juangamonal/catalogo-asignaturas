@@ -1,12 +1,8 @@
 ## 1) Introducción:
-TODO: hacer algo con esto
-Anotaciones:
-- https://laravel.com/
-- Laravel 5.8.
-- Creado el 2011
 
 Características principales de Laravel:
 - Open source.
+- Creado el 2011.
 - Orientado a la sintaxis elegante y simple.
 - Utiliza el patrón MVC.
 - Robusto conjunto de librerías propias y de terceros.
@@ -29,12 +25,11 @@ Los requisitos de instalación son:
 
 También se necesita el gestor de paquetes **Composer**.
 
-TODO: instalador Centos
 ```
 # Ubuntu
 sudo apt install -y composer
 
-# Centos
+yum install composer
 ```
 
 
@@ -45,34 +40,18 @@ composer create-project --prefer-dist laravel/laravel <nombredelproyecto>
 ```
 Con esto se generará un proyecto base de Laravel en su versión más reciente.
 
-Otra opción para realizar esto es instalar el instalador de Laravel a nivel global:
-
 ```
 composer global require laravel/installer
 ```
-
-Luego hay que configurar el PATH para que identifique el instalador como un ejecutable.
-
-TODO: laravel en path
-
-```
-laravel new <nombredelproyecto>
-```
-
-Con esto obtenemos el mismo resultado que con lo anterior.
 
 ![Instalación nueva](img/instalación-nueva.png)
 
 Configuramos un nuevo virtual host en Apache.
 
 ```
-# Ubuntu
 cd /etc/apache2/sites-available
 sudo touch <nombredelproyecto>.conf
 sudo nano <nombredelproyecto>.conf
-
-# Centos
-TODO centos
 ```
 
 Una vez dentro copiamos la configuración que aparece en el **Instructivo Configuración de Ambiente Local**, aunque en las rutas de la aplicación deben indicar la carpeta **/public** del proyecto
@@ -90,12 +69,8 @@ Una vez dentro copiamos la configuración que aparece en el **Instructivo Config
 Luego debemos levantar el sitio web:
 
 ```
-# Ubuntu
 sudo a2ensite <nombredelproyecto>.conf
 sudo service apache2 reload
-
-# Centos
-TODO
 ```
 
 Para finalizar debemos ajustar un par de cosas en Laravel
@@ -116,7 +91,6 @@ Comprobamos visitando la url de la aplicación deberíamos visualizar una imagen
 ```
 
 ![Página Home](img/laravel-pagina-home.png)
-
 
 ## 3) Configuración:
 
@@ -568,9 +542,11 @@ public function get()
         ->find(1);
 
     // funciones extra de SQL
-    $users = DB::table('users')->count();
+    $users = DB::table('users')
+        ->count();
 
-    $price = DB::table('orders')->max('price');
+    $price = DB::table('orders')
+        ->max('price');
 
     $price = DB::table('orders')
         ->where('finalized', 1)
@@ -801,3 +777,205 @@ php artisan db:seed
 # ejecuta una semilla en específico
 php artisan db:seed --class=UsersTableSeeder
 ```
+
+## 6) Librerías extra:
+
+### Auth:
+
+La configuración viene en `config/auth.php` y permite configurar distintos parámetros de autenticación.
+
+Si ejecutas esto tendrás una estructura básica de Login incluyendo vistas, validaciones y web components:
+
+```
+php artisan make:auth
+```
+
+```php
+public function store(Request $request)
+{
+    // obtiene usuario
+    $user = Auth::user();
+
+    // obtiene solo id
+    $id = Auth::id();
+
+    // si está autenticado en la sesión http
+    $user = $request->user();
+
+    // verifica si está logueado
+    echo Auth::check(); // true/false
+
+    // utiliza un guardia distinto
+    echo Auth::guard('api')->check(); // true/false
+
+    // logout
+    Auth::logout();
+}
+```
+
+### Session:
+
+La configuración viene en el archivo `config/session.php` y permite guardar valores en la sesión del usuario.
+
+Para poder trabajar con la sesión puedes hacerlo así:
+
+```php
+public function post(Request $request)
+{
+    // extrae el nombre guardado en sesión o si no coloca uno por defecto
+    $id = $request->session()->get('name', 'Juan Gamonal');
+
+    // helper
+    $id = session('name', 'Juan Gamonal');
+
+    // obtener todo
+    $values = session()->all();
+
+    // verifica si existe
+    echo session()->has('name'); // true/false
+
+    // guarda valores
+    session()->put('name', $request->name);
+}
+```
+
+### Console:
+
+Todo lo relacionado con consola se configura en `app/Console/Kernel.php`, los comandos nuevos van en `app/Console/Commands`:
+
+```
+php artisan list
+```
+
+Generar nuevo comando:
+
+```
+php artisan make:command CountDatabase
+```
+
+Ejemplo de un comando:
+
+```php
+<?php
+
+namespace App\Console\Commands;
+
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
+
+class CountDatabase extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'count:database';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Cuenta elementos en la base de datos';
+
+    /**
+     * Create a new command instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        parent::__construct();
+    }
+
+    /**
+     * Execute the console command.
+     *
+     * @return mixed
+     */
+    public function handle()
+    {
+        $facultades = DB::table('facultades')
+            ->count();
+
+        $carreras = DB::table('carreras')
+            ->count();
+
+        $asignaturas = DB::table('asignaturas')
+            ->count();
+
+        $this->line("Existen $facultades facultades");
+        $this->info("Existen $carreras carreras");
+        $this->error("Existen $asignaturas asignaturas");
+    }
+}
+```
+
+Ejecutar nuevo comando:
+
+```
+php artisan count:database
+```
+
+### Queues:
+
+Sirve para encolar diferentes acciones y que no interfieran en la ejecución normal. Se configuran en `config/queue.php`.
+
+Para generar un Job:
+
+```
+php artisan make:job ProcessPodcast
+```
+
+Esto generará un job por defecto
+
+```php
+<?php
+
+namespace App\Jobs;
+
+use Illuminate\Bus\Queueable;
+use Illuminate\Queue\SerializesModels;
+use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Foundation\Bus\Dispatchable;
+
+class ProcessPodcast implements ShouldQueue
+{
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    /**
+     * Create a new job instance.
+     *
+     * @return void
+     */
+    public function __construct()
+    {
+        //
+    }
+
+    /**
+     * Execute the job.
+     *
+     * @return void
+     */
+    public function handle()
+    {
+        //
+    }
+}
+```
+
+Solicitar ejecución de la cola:
+
+```php
+public function store(Request $request)
+{
+    // Create podcast...
+
+    ProcessPodcast::dispatch($podcast);    
+}
+```
+
+
