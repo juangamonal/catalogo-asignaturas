@@ -17,10 +17,8 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/buscador', function () {
-    return view('seeker');
-});
+Route::view('/inicio', 'index');
 
-Route::get('/resultados', function (Request $request) {
-    return view('results', $request->query());
-});
+Route::view('/buscador', 'seeker');
+
+Route::view('/resultados', 'results');

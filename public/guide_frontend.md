@@ -58,7 +58,7 @@ Webpack es una librería Node que compila tu código, archivos, css y diferentes
 - Instalación de NodeJS
 
 ```
-# Ubuntu
+# Debian
 sudo apt install -y nodejs
 
 # Centos
