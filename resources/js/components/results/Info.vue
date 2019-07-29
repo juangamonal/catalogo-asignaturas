@@ -16,6 +16,10 @@
         <ul>
             <li v-for="p in data.prerequisitos">{{ p.nombre }}</li>
         </ul>
+
+        <button class="btn btn-primary form-control">
+            Descargar programa
+        </button>
     </div>
 </template>
 

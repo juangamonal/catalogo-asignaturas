@@ -12,7 +12,7 @@
                 <a href="/buscador">Buscador de Asignaturas</a>
             </li>
             <li>
-                <a href="/buscador">Inicio</a>
+                <a href="/inicio">Inicio</a>
             </li>
         </ul>
     </div>

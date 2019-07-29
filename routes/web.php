@@ -21,4 +21,6 @@ Route::view('/inicio', 'index');
 
 Route::view('/buscador', 'seeker');
 
-Route::view('/resultados', 'results');
+Route::get('/resultados', function (Request $request) {
+    return view('results', $request->all());
+});
